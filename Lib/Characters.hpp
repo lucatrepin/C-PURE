@@ -15,9 +15,7 @@ protected:
     sf::Vector2f Vel;
     sf::Vector2f Direc;
 
-    Character(sf::Vector2f vel, sf::Vector2f direc = {1, 0}) : Entitys::Entity<TypeShape>(), Vel(vel), Direc(direc) {
-
-    }
+    Character(sf::Vector2f vel, sf::Vector2f direc = {1, 0}) : Entitys::Entity<TypeShape>(), Vel(vel), Direc(direc) {}
     virtual void Move() {
         float x = 0;
         float y = 0;
@@ -30,11 +28,6 @@ protected:
 
     void Start() override = 0;
     void Process(float delta) override = 0;
-
-public:
-    bool IsOnFloor() {
-        return true;
-    }
 };
 
 template <typename TypeShape>
@@ -55,8 +48,9 @@ public:
         if (IsOnFloor()) TimeJump = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now());
     }
     virtual void Jump(float delta) {
-        float duration = std::min(MaxChargeJumpTime, std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now()) - TimeJump);
-        // usar duration / terminar funcao
+        float charge = std::min(MaxChargeJumpTime, std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now()) - TimeJump);
+        if (charge > MinChargeJumpTime) Shape->move(JumpForce * charge);
+        // usar charge / terminar funcao
     }
 
     void Start() override = 0;

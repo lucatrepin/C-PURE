@@ -9,7 +9,6 @@
 
 #include "Node.hpp"
 
-// entidades simples que servem para ser criadas em massa de forma leve
 namespace Entitys
 {
 
@@ -17,9 +16,28 @@ template <typename TypeShape>
 class Entity : public Node::Node2D {
 protected:
     std::unique_ptr<TypeShape> Shape;
+
 public:
     virtual void Move(sf::Vector2f vel) { Shape->move(vel); }
     virtual void Draw(sf::RenderWindow& window) { window.draw(*Shape); }
+
+    bool VerifyCollision(Entity<sf::RectangleShape>& other) {
+        if (Shape->getGlobalBounds().intersects(other.Shape->getGlobalBounds())) {
+            return true;
+        }
+        return false;
+    }
+
+    bool VerifyCollision(Entity<sf::ConvexShape>& other) {
+        if () {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsOnFloor() {
+        return true;
+    }
 
     void Start() override = 0;
     void Process(float delta) override = 0;
