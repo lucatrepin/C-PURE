@@ -1,81 +1,58 @@
-#ifndef GAMES_HPP
-#define GAMES_HPP
+#include <vector>
+#include <cstdlib>
 
-#include <SFML/Window/Keyboard.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Sleep.hpp>
-#include <vector>
 
-#include "Util.cpp"
-#include "Characters.hpp"
+using namespace sf;
+
+using namespace std;
 
 namespace Games
 {
 
-typedef sf::Keyboard::Scan::Scancode Scan;
-
 class Game {
 private:
-    bool gameOver = false;
-    float normalDelta;
-    sf::Clock clockDelta;
-    sf::Clock clockDelay;
+    bool GameOver = false;
+    float Delta;
+    float NormalDelta;
+    sf::Clock ClockDelay;
+    float AverageFPS;
+    //bool DrawFPS = true;
     
-    virtual void Process(float delta) {
-
-    }
-    virtual void Draw() {
-
-    }
 public:
-    virtual void Run() {
-        while(!gameOver) {
-            float delta = clockDelta.restart().asSeconds();
-            clockDelay.restart();
-            Process(delta);
+    sf::RenderWindow window;
+    Game(sf::VideoMode videoMode, const string& title, int frames = 2000000000) {
+        window.create(videoMode, title);
+        SetMaxFrames(frames);
+        system("Server.exe 8079");
+    }
+    virtual void Start() {
+        while (!GameOver) {
+            ClockDelay.restart();
+            Process(Delta / 1000000.f);
+            window.clear(sf::Color::Black);
             Draw();
-            float delay = clockDelay.getElapsedTime().asSeconds();
-            if (delay < normalDelta) ut::s(normalDelta - delay);
+            window.display();
+            float delay = ClockDelay.getElapsedTime().asMicroseconds();
+            if (delay < NormalDelta) {
+                sf::sleep(sf::microseconds(NormalDelta - delay));
+                Delta = NormalDelta;
+                AverageFPS = 1000000.0f / NormalDelta;
+            } else {
+                Delta = delay;
+                AverageFPS = 1000000.0f / delay;
+            }
+            //if (DrawFPS) std::cout << "FPS: " << AverageFPS << std::endl;   
         }
-        char tecla = std::cin.get();
-        ut::clearCMD();
-        std::cout << tecla << std::endl;
-        ut::s(10); // remover 
-        if (tecla == 'a') Run();
     }
-};
-
-class GameASCII : public Game {
-private:
-    int frame;
-public:
-    GameASCII(int width = 120, int height = 30, int frames = 60, char nulo = '#', char player = 'P', char obstacle = 'O', char enemie = 'E') : Width(width), Height(height), Frames(frames), Nulo(nulo), Player(player), Obstacle(obstacle), Enemie(enemie)  {
+    virtual void Process(float delta) = 0;
+    virtual void Draw() {
         
     }
-    bool GameOver = false;
-    int Width;
-    int Height;
-    int Frames;
 
-    char Nulo;
-    char Player;
-    char Obstacle;
-    char Enemie;
-
-    std::vector<char> window;
-    
-    void Process(float delta) override = 0;
-    void Draw() override {
-        if (frame == Frames) {
-            frame = 0;
-            ut::clearCMD();
-        }
-        std::string str = "";
-        for(int h = 0; h < Height; h++) for(int w = 0; w < Width; w++) str += window[h * Width + w];
-        std::cout << str;
-    }
+    void SetMaxFrames(int frames) { NormalDelta = 1000000.f / frames; }
+    //void SetDrawFPS(bool state) { DrawFPS = state; }
 };
 
 }
-
-#endif
