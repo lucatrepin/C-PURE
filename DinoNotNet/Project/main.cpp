@@ -12,10 +12,18 @@ private:
     sf::RectangleShape dino;
 
     void Process(float delta) override {
-        // Game logic processing
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+        }
     }
     void Draw() override {
         window.draw(dino);
+    }
+    void ProcessEvent(const sf::Event& event) override {
+        // Processa outros eventos aqui, se necessario
     }
 
 public:
@@ -27,7 +35,7 @@ public:
 };
 
 int main() {
-    DinoGame game(sf::VideoMode(800, 600), "Dino Not Net");
+    DinoGame game(sf::VideoMode(800, 600), "Dino Not Net", 60);
     game.Start();
     return 0;
 }
